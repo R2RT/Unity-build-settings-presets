@@ -11,7 +11,7 @@ namespace TelroshanTools.BuildSettingsPresets.Editor
             if (GUILayout.Button("Apply settings"))
             {
                 AssetDatabase.TryGetGUIDAndLocalFileIdentifier(target, out string guid, out long _);
-                BuildSettingsPresetsManager.ApplyPreset(guid);
+                ((BuildSettingsPreset)target).Apply();
             }
             
             if (GUILayout.Button("Overwrite with current build settings"))

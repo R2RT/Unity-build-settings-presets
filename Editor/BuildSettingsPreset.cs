@@ -31,7 +31,8 @@ namespace TelroshanTools.BuildSettingsPresets.Editor
             public bool enabled;
         }
 
-        [Header("Build settings")] [SerializeField]
+        [Header("Build settings")]
+        [SerializeField]
         private BuildScene[] scenes;
 
         [SerializeField] private BuildTarget activeBuildTarget;
@@ -122,12 +123,12 @@ namespace TelroshanTools.BuildSettingsPresets.Editor
         public void OverwriteWithCurrentBuildSettings()
         {
             scenes = EditorBuildSettings.scenes.Select(x => new BuildScene
-                {
-                    scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(x.path),
-                    path = x.path,
-                    guid = x.guid.ToString(),
-                    enabled = x.enabled,
-                })
+            {
+                scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(x.path),
+                path = x.path,
+                guid = x.guid.ToString(),
+                enabled = x.enabled,
+            })
                 .ToArray();
 
             activeBuildTarget = EditorUserBuildSettings.activeBuildTarget;
@@ -335,6 +336,100 @@ namespace TelroshanTools.BuildSettingsPresets.Editor
                 // from the current build settings values
                 OverwriteWithCurrentBuildSettings();
             }
+        }
+
+        public int GetDiffFactor()
+        {
+            var factor = 0;
+            foreach (var (a, b) in Enumerable.Zip(EditorBuildSettings.scenes.OrderBy(s => s.path), scenes.OrderBy(s => s.path), (a, b) => (a, b)))
+            {
+                factor += (a.path, a.enabled) == (b.path, b.enabled) ? 0 : 1;
+            }
+
+            factor += EditorUserBuildSettings.activeBuildTarget == activeBuildTarget ? 0 : 1;
+            factor += PlayerSettings.GetScriptingDefineSymbolsForGroup(selectedBuildTargetGroup).Split(',').SequenceEqual(activeScriptCompilationDefines) ? 0 : 1;
+            factor += EditorUserBuildSettings.allowDebugging == allowDebugging ? 0 : 1;
+            factor += EditorUserBuildSettings.androidBuildSubtarget == androidBuildSubtarget ? 0 : 1;
+            factor += EditorUserBuildSettings.androidETC2Fallback == androidEtc2Fallback ? 0 : 1;
+            factor += EditorUserBuildSettings.buildAppBundle == buildAppBundle ? 0 : 1;
+            factor += EditorUserBuildSettings.buildScriptsOnly == buildScriptsOnly ? 0 : 1;
+            factor += EditorUserBuildSettings.compressFilesInPackage == compressFilesInPackage ? 0 : 1;
+            factor += EditorUserBuildSettings.connectProfiler == connectProfiler ? 0 : 1;
+            factor += EditorUserBuildSettings.development == development ? 0 : 1;
+            factor += EditorUserBuildSettings.standaloneBuildSubtarget == StandaloneBuildSubtarget.Server ^ enableHeadlessMode ? 1 : 0;
+            factor += EditorUserBuildSettings.explicitArrayBoundsChecks == explicitArrayBoundsChecks ? 0 : 1;
+            factor += EditorUserBuildSettings.explicitDivideByZeroChecks == explicitDivideByZeroChecks ? 0 : 1;
+            factor += EditorUserBuildSettings.explicitNullChecks == explicitNullChecks ? 0 : 1;
+            factor += EditorUserBuildSettings.exportAsGoogleAndroidProject == exportAsGoogleAndroidProject ? 0 : 1;
+            factor += EditorUserBuildSettings.forceInstallation == forceInstallation ? 0 : 1;
+            factor += EditorUserBuildSettings.installInBuildFolder == installInBuildFolder ? 0 : 1;
+            factor += EditorUserBuildSettings.iOSXcodeBuildConfig == iOsBuildConfigType ? 0 : 1;
+            factor += EditorUserBuildSettings.movePackageToDiscOuterEdge == movePackageToDiscOuterEdge ? 0 : 1;
+            factor += EditorUserBuildSettings.needSubmissionMaterials == needSubmissionMaterials ? 0 : 1;
+            factor += EditorUserBuildSettings.ps4BuildSubtarget == ps4BuildSubtarget ? 0 : 1;
+            factor += EditorUserBuildSettings.ps4HardwareTarget == ps4HardwareTarget ? 0 : 1;
+            factor += EditorUserBuildSettings.selectedBuildTargetGroup == selectedBuildTargetGroup ? 0 : 1;
+            factor += EditorUserBuildSettings.selectedStandaloneTarget == selectedStandaloneTarget ? 0 : 1;
+            factor += EditorUserBuildSettings.streamingInstallLaunchRange == streamingInstallLaunchRange ? 0 : 1;
+            factor += EditorUserBuildSettings.symlinkSources == symlinkLibraries ? 0 : 1;
+            factor += EditorUserBuildSettings.waitForPlayerConnection == waitForPlayerConnection ? 0 : 1;
+            factor += EditorUserBuildSettings.windowsDevicePortalAddress == windowsDevicePortalAddress ? 0 : 1;
+            factor += EditorUserBuildSettings.windowsDevicePortalPassword == windowsDevicePortalPassword ? 0 : 1;
+            factor += EditorUserBuildSettings.windowsDevicePortalUsername == windowsDevicePortalUsername ? 0 : 1;
+            factor += EditorUserBuildSettings.wsaBuildAndRunDeployTarget == wsaBuildAndRunDeployTarget ? 0 : 1;
+            factor += EditorUserBuildSettings.wsaUWPSDK == wsaUwpsdk ? 0 : 1;
+            factor += EditorUserBuildSettings.wsaUWPVisualStudioVersion == wsaUwpVisualStudioVersion ? 0 : 1;
+            factor += EditorUserBuildSettings.xboxBuildSubtarget == xboxBuildSubtarget ? 0 : 1;
+            factor += EditorUserBuildSettings.xboxOneDeployDrive == xboxOneDeployDrive ? 0 : 1;
+            factor += EditorUserBuildSettings.xboxOneDeployMethod == xboxOneDeployMethod ? 0 : 1;
+            factor += EditorUserBuildSettings.xboxOneRebootIfDeployFailsAndRetry == xboxOneRebootIfDeployFailsAndRetry ? 0 : 1;
+
+            if (presetVersion > PresetVersion.V2019_2)
+            {
+                factor += EditorUserBuildSettings.selectedQnxOsVersion == selectedQnxOsVersion ? 0 : 1;
+                factor += EditorUserBuildSettings.selectedQnxArchitecture == selectedQnxArchitecture ? 0 : 1;
+                factor += EditorUserBuildSettings.selectedEmbeddedLinuxArchitecture == selectedEmbeddedLinuxArchitecture ? 0 : 1;
+                factor += EditorUserBuildSettings.remoteDeviceInfo == remoteDeviceInfo ? 0 : 1;
+                factor += EditorUserBuildSettings.remoteDeviceAddress == remoteDeviceAddress ? 0 : 1;
+                factor += EditorUserBuildSettings.remoteDeviceUsername == remoteDeviceUsername ? 0 : 1;
+                factor += EditorUserBuildSettings.remoteDeviceExports == remoteDeviceExports ? 0 : 1;
+                factor += EditorUserBuildSettings.pathOnRemoteDevice == pathOnRemoteDevice ? 0 : 1;
+                factor += EditorUserBuildSettings.standaloneBuildSubtarget == standaloneBuildSubtarget ? 0 : 1;
+                factor += EditorUserBuildSettings.webGLBuildSubtarget == webGLBuildSubtarget ? 0 : 1;
+                factor += EditorUserBuildSettings.androidETC2Fallback == androidETC2Fallback ? 0 : 1;
+                factor += EditorUserBuildSettings.androidBuildSystem == androidBuildSystem ? 0 : 1;
+                factor += EditorUserBuildSettings.androidBuildType == androidBuildType ? 0 : 1;
+                factor += EditorUserBuildSettings.androidCreateSymbols == androidCreateSymbols ? 0 : 1;
+                factor += EditorUserBuildSettings.wsaUWPBuildType == wsaUWPBuildType ? 0 : 1;
+                factor += EditorUserBuildSettings.wsaUWPSDK == wsaUWPSDK ? 0 : 1;
+                factor += EditorUserBuildSettings.wsaMinUWPSDK == wsaMinUWPSDK ? 0 : 1;
+                factor += EditorUserBuildSettings.wsaArchitecture == wsaArchitecture ? 0 : 1;
+                factor += EditorUserBuildSettings.wsaUWPVisualStudioVersion == wsaUWPVisualStudioVersion ? 0 : 1;
+                factor += EditorUserBuildSettings.overrideMaxTextureSize == overrideMaxTextureSize ? 0 : 1;
+                factor += EditorUserBuildSettings.overrideTextureCompression == overrideTextureCompression ? 0 : 1;
+                factor += EditorUserBuildSettings.buildWithDeepProfilingSupport == buildWithDeepProfilingSupport ? 0 : 1;
+                factor += EditorUserBuildSettings.symlinkSources == symlinkSources ? 0 : 1;
+                factor += EditorUserBuildSettings.iOSXcodeBuildConfig == iOSXcodeBuildConfig ? 0 : 1;
+                factor += EditorUserBuildSettings.macOSXcodeBuildConfig == macOSXcodeBuildConfig ? 0 : 1;
+                factor += EditorUserBuildSettings.switchCreateRomFile == switchCreateRomFile ? 0 : 1;
+                factor += EditorUserBuildSettings.switchEnableRomCompression == switchEnableRomCompression ? 0 : 1;
+                factor += EditorUserBuildSettings.switchSaveADF == switchSaveAdf ? 0 : 1;
+                factor += EditorUserBuildSettings.switchRomCompressionType == switchRomCompressionType ? 0 : 1;
+                factor += EditorUserBuildSettings.switchRomCompressionLevel == switchRomCompressionLevel ? 0 : 1;
+                factor += EditorUserBuildSettings.switchRomCompressionConfig == switchRomCompressionConfig ? 0 : 1;
+                factor += EditorUserBuildSettings.switchNVNGraphicsDebugger == switchNVNGraphicsDebugger ? 0 : 1;
+                factor += EditorUserBuildSettings.generateNintendoSwitchShaderInfo == generateNintendoSwitchShaderInfo ? 0 : 1;
+                factor += EditorUserBuildSettings.switchNVNShaderDebugging == switchNVNShaderDebugging ? 0 : 1;
+                factor += EditorUserBuildSettings.switchNVNDrawValidation_Light == switchNVNDrawValidationLight ? 0 : 1;
+                factor += EditorUserBuildSettings.switchNVNDrawValidation_Heavy == switchNVNDrawValidationHeavy ? 0 : 1;
+                factor += EditorUserBuildSettings.switchEnableMemoryTracker == switchEnableMemoryTracker ? 0 : 1;
+                factor += EditorUserBuildSettings.switchWaitForMemoryTrackerOnStartup == switchWaitForMemoryTrackerOnStartup ? 0 : 1;
+                factor += EditorUserBuildSettings.switchEnableDebugPad == switchEnableDebugPad ? 0 : 1;
+                factor += EditorUserBuildSettings.switchRedirectWritesToHostMount == switchRedirectWritesToHostMount ? 0 : 1;
+                factor += EditorUserBuildSettings.switchHTCSScriptDebugging == switchHtcsScriptDebugging ? 0 : 1;
+                factor += EditorUserBuildSettings.switchUseLegacyNvnPoolAllocator == switchUseLegacyNvnPoolAllocator ? 0 : 1;
+            }
+            return factor;
         }
     }
 }

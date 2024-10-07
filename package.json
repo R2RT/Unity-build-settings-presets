@@ -1,0 +1,15 @@
+{
+  "name": "com.telroshan.build-presets",
+  "displayName": "Build Settings Presets",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "This asset lets you save build settings presets in Unity and switch easily between them.",
+  "keywords": [
+    "Editor",
+    "Build"
+  ],
+  "author":{
+    "name" : "Telroshan",
+    "url" : "https://github.com/Telroshan"
+ }
+}
